@@ -19,22 +19,25 @@ class Oystercard
   end
 
   def touch_in(station)
+    deduct(@history.last.finish) unless (@history.last.nil? || @history.last.paid)
     minimum_amount_error = 'The minimum amount for a single journey is £1'
     raise minimum_amount_error if less_minimum?
-    @entry_station = station
+    make_journey(entry: station)
   end
 
-  def touch_out exit_station
-    deduct(CHARGE)
-    @history << {entry_station: @entry_station, exit_station: exit_station}
-    @entry_station = nil
+  def touch_out station
+    !@history.last || @history.last.paid ?  deduct(make_journey(exit: station).finish) : deduct(@history.last.finish station)
   end
 
   def in_journey?
-    @entry_station
+    !(@history.last.nil? || @history.last.paid)
   end
 
   private
+  def make_journey(options={})
+    @history << Journey.new(entry: options[:entry], exit: options[:exit])
+    @history.last
+  end
 
   def deduct(fare)
     @balance -= fare
@@ -43,5 +46,5 @@ class Oystercard
   def less_minimum?
     @balance < MINIMUM_AMOUNT
   end
-
 end
+
