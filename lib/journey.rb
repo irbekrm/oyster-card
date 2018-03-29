@@ -11,17 +11,19 @@ class Journey
     @paid = false
   end
 
-  def fare
-    @paid = true
-    complete? ? MINIMUM_FARE : MINIMUM_PENALTY
-  end
   
   def finish exit=nil
-    @exit_station = exit
+    @exit_station = @exit_station || exit
     fare
   end
 
   def complete?
-    @entry_station && @exit_station
+    !(@entry_station.nil? || @exit_station.nil?)
+  end
+
+  private
+  def fare
+    @paid = true
+    complete? ? MINIMUM_FARE : MINIMUM_PENALTY
   end
 end
